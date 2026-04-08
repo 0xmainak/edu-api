@@ -1,0 +1,1279 @@
+{
+  "info": {
+    "name": "School Management API",
+    "description": "Complete test suite for the School Management API covering health check, add school, and list schools endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check — Server Running",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success true', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Message says server is running', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Server is running');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Add School",
+      "item": [
+        {
+          "name": "Add School — Valid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Springfield Elementary\",\n  \"address\": \"123 Main St, Springfield\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has success true', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Response contains school data with id', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('id');",
+                  "    pm.expect(json.data.name).to.eql('Springfield Elementary');",
+                  "    pm.expect(json.data.address).to.eql('123 Main St, Springfield');",
+                  "    pm.expect(json.data.latitude).to.eql(39.7817);",
+                  "    pm.expect(json.data.longitude).to.eql(-89.6501);",
+                  "});",
+                  "",
+                  "// Save the school ID for later use",
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('schoolId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Second School (for distance testing)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Liberty High School\",\n  \"address\": \"456 Liberty Ave, New York\",\n  \"latitude\": 40.7580,\n  \"longitude\": -73.9855\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has success true', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Second school created with correct data', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('id');",
+                  "    pm.expect(json.data.name).to.eql('Liberty High School');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Trims whitespace in name and address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"  Trimmed School  \",\n  \"address\": \"  456 Trimmed Ave  \",\n  \"latitude\": 28.6139,\n  \"longitude\": 77.2090\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Name and address are trimmed', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.name).to.eql('Trimmed School');",
+                  "    pm.expect(json.data.address).to.eql('456 Trimmed Ave');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Boundary: latitude = 90, longitude = 180",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"North Pole Academy\",\n  \"address\": \"North Pole\",\n  \"latitude\": 90,\n  \"longitude\": 180\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201 — boundary values accepted', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Coordinates are at boundary max', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.latitude).to.eql(90);",
+                  "    pm.expect(json.data.longitude).to.eql(180);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Boundary: latitude = -90, longitude = -180",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"South Pole Academy\",\n  \"address\": \"South Pole\",\n  \"latitude\": -90,\n  \"longitude\": -180\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201 — boundary values accepted', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Coordinates are at boundary min', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.latitude).to.eql(-90);",
+                  "    pm.expect(json.data.longitude).to.eql(-180);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Empty body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Response has success false', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "});",
+                  "",
+                  "pm.test('Error message indicates all fields required', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('All fields are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Missing name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"123 Main St\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message about required fields', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('All fields are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Missing address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test School\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message about required fields', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('All fields are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Missing latitude",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test School\",\n  \"address\": \"123 Main St\",\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message about required fields', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('All fields are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Empty string name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"address\": \"123 Main St\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error about empty name', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Whitespace-only name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"   \",\n  \"address\": \"123 Main St\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Whitespace-only name rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Name must be a non-empty string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Name is a number (wrong type)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": 12345,\n  \"address\": \"123 Main St\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Non-string name rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Name must be a non-empty string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Latitude out of range (91)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Out of Range School\",\n  \"address\": \"Nowhere\",\n  \"latitude\": 91,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Latitude out of range rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude must be a number between -90 and 90');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Latitude out of range (-91)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Out of Range School\",\n  \"address\": \"Nowhere\",\n  \"latitude\": -91,\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Negative latitude out of range rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude must be a number between -90 and 90');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Longitude out of range (181)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Out of Range School\",\n  \"address\": \"Nowhere\",\n  \"latitude\": 39.7817,\n  \"longitude\": 181\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Longitude out of range rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Longitude must be a number between -180 and 180');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add School — Latitude as string",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"String Lat School\",\n  \"address\": \"123 Main St\",\n  \"latitude\": \"not-a-number\",\n  \"longitude\": -89.6501\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addSchool",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('String latitude rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude must be a number between -90 and 90');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "List Schools",
+      "item": [
+        {
+          "name": "List Schools — Valid coordinates (New York)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=40.7128&longitude=-74.0060",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "40.7128"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-74.0060"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success true', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Response has count and data array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('count');",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    pm.expect(json.count).to.eql(json.data.length);",
+                  "});",
+                  "",
+                  "pm.test('Each school has distance field', function () {",
+                  "    const json = pm.response.json();",
+                  "    json.data.forEach(function (school) {",
+                  "        pm.expect(school).to.have.property('distance');",
+                  "        pm.expect(school.distance).to.be.a('number');",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('Schools are sorted by distance (ascending)', function () {",
+                  "    const json = pm.response.json();",
+                  "    for (let i = 1; i < json.data.length; i++) {",
+                  "        pm.expect(json.data[i].distance).to.be.at.least(json.data[i - 1].distance);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Valid coordinates (origin 0, 0)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=0&longitude=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "0"
+                },
+                {
+                  "key": "longitude",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response returns sorted schools', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    for (let i = 1; i < json.data.length; i++) {",
+                  "        pm.expect(json.data[i].distance).to.be.at.least(json.data[i - 1].distance);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Boundary: latitude=90, longitude=180",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=90&longitude=180",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "90"
+                },
+                {
+                  "key": "longitude",
+                  "value": "180"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 — boundary values accepted', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is valid', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Missing both parameters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error about missing parameters', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude and longitude query parameters are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Missing longitude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=40.7128",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "40.7128"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error about missing parameters', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude and longitude query parameters are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Missing latitude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?longitude=-74.0060",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "longitude",
+                  "value": "-74.0060"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error about missing parameters', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude and longitude query parameters are required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Latitude out of range (91)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=91&longitude=-74.0060",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "91"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-74.0060"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Latitude out of range rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude must be a valid number between -90 and 90');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Longitude out of range (181)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=40.7128&longitude=181",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "40.7128"
+                },
+                {
+                  "key": "longitude",
+                  "value": "181"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Longitude out of range rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Longitude must be a valid number between -180 and 180');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Non-numeric latitude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=abc&longitude=-74.0060",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "abc"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-74.0060"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Non-numeric latitude rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Latitude must be a valid number between -90 and 90');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List Schools — Non-numeric longitude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/listSchools?latitude=40.7128&longitude=xyz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "40.7128"
+                },
+                {
+                  "key": "longitude",
+                  "value": "xyz"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Non-numeric longitude rejected', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "    pm.expect(json.message).to.eql('Longitude must be a valid number between -180 and 180');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}
